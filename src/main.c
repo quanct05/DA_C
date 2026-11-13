@@ -1,6 +1,25 @@
 #include <stdio.h>
 #include <windows.h>
 
+struct theLoai
+{
+    int maTheLoai;
+    char tenTheLoai[50];
+
+};
+struct typePhim
+{
+    int maPhim;
+    char tenPhim[50];
+    char daoDien[50];
+    int namSX;
+    int loaiPhim;
+    float thoiLuong;
+    int doTuoi;
+};
+
+
+
 int main()
 {
     int choice;
@@ -29,6 +48,49 @@ int main()
         {
         case 1:
             printf("Quan ly phim\n");
+
+            printf("---------------Quan ly the loai phim----------------------\n");
+
+            
+            struct theLoai theLoaiPhim;
+            printf("Nhap ma the loai: ");
+            scanf("%d", &theLoaiPhim.maTheLoai);
+            printf("Nhap ten the loai: ");  
+            scanf(" %[^\n]s", theLoaiPhim.tenTheLoai);
+
+            printf("---------------Nhap thong tin phim----------------------\n");
+            
+            struct typePhim Phim;
+
+
+
+            printf("Nhap ma the loai: ");
+            scanf("%d", &Phim.loaiPhim);
+            printf("Nhap ma phim: ");
+            scanf("%d", &Phim.maPhim);
+            printf("Nhap ten phim: ");
+            scanf(" %[^\n]s", Phim.tenPhim);
+            printf("Nhap dao dien: ");
+            scanf(" %[^\n]s", Phim.daoDien);
+            printf("Nhap nam san xuat: ");
+            scanf("%d", &Phim.namSX);
+            
+            printf("Nhap thoi luong: ");
+            scanf("%f", &Phim.thoiLuong);
+            printf("Nhap do tuoi: ");
+            scanf("%d", &Phim.doTuoi);
+
+            
+
+
+
+
+
+
+
+
+
+
             break;
         case 2:
             printf("Quan ly ghe\n");
