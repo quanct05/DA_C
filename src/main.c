@@ -5,7 +5,6 @@ struct theLoai
 {
     int maTheLoai;
     char tenTheLoai[50];
-
 };
 struct typePhim
 {
@@ -17,8 +16,6 @@ struct typePhim
     float thoiLuong;
     int doTuoi;
 };
-
-
 
 int main()
 {
@@ -40,56 +37,69 @@ int main()
             printf("Vui long nhap so nguyen!\n");
 
             int c;
-            while ((c = getchar()) != '\n' && c != EOF);
+            while ((c = getchar()) != '\n' && c != EOF)
+                ;
 
             continue;
         }
         switch (choice)
         {
         case 1:
+
             printf("Quan ly phim\n");
+            int subChoice;
+            do
+            {
+                printf("=========CHU NANG============\n");
+                printf("1.	Quan ly the loai phim\n");
+                printf("2.	Quan ly phim\n");
+                printf("Chon chuc nang: ");
+                if (scanf("%d", &subChoice) != 1)
+                {
+                    printf("Vui long nhap so nguyen!\n");
 
-            printf("---------------Quan ly the loai phim----------------------\n");
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF)
+                        ;
 
-            
-            struct theLoai theLoaiPhim;
-            printf("Nhap ma the loai: ");
-            scanf("%d", &theLoaiPhim.maTheLoai);
-            printf("Nhap ten the loai: ");  
-            scanf(" %[^\n]s", theLoaiPhim.tenTheLoai);
+                    continue;
+                }
+                switch (subChoice)
+                {
+                case 1:
+                    printf("---------------Quan ly the loai phim----------------------\n");
 
-            printf("---------------Nhap thong tin phim----------------------\n");
-            
-            struct typePhim Phim;
+                    struct theLoai theLoaiPhim;
+                    printf("Nhap ma the loai: ");
+                    scanf("%d", &theLoaiPhim.maTheLoai);
+                    printf("Nhap ten the loai: ");
+                    scanf(" %[^\n]s", theLoaiPhim.tenTheLoai);
 
+                    break;
 
+                case 2:
+                    printf("---------------Nhap thong tin phim----------------------\n");
 
-            printf("Nhap ma the loai: ");
-            scanf("%d", &Phim.loaiPhim);
-            printf("Nhap ma phim: ");
-            scanf("%d", &Phim.maPhim);
-            printf("Nhap ten phim: ");
-            scanf(" %[^\n]s", Phim.tenPhim);
-            printf("Nhap dao dien: ");
-            scanf(" %[^\n]s", Phim.daoDien);
-            printf("Nhap nam san xuat: ");
-            scanf("%d", &Phim.namSX);
-            
-            printf("Nhap thoi luong: ");
-            scanf("%f", &Phim.thoiLuong);
-            printf("Nhap do tuoi: ");
-            scanf("%d", &Phim.doTuoi);
+                    struct typePhim Phim;
 
-            
+                    printf("Nhap ma the loai: ");
+                    scanf("%d", &Phim.loaiPhim);
+                    printf("Nhap ma phim: ");
+                    scanf("%d", &Phim.maPhim);
+                    printf("Nhap ten phim: ");
+                    scanf(" %[^\n]s", Phim.tenPhim);
+                    printf("Nhap dao dien: ");
+                    scanf(" %[^\n]s", Phim.daoDien);
+                    printf("Nhap nam san xuat: ");
+                    scanf("%d", &Phim.namSX);
 
-
-
-
-
-
-
-
-
+                    printf("Nhap thoi luong: ");
+                    scanf("%f", &Phim.thoiLuong);
+                    printf("Nhap do tuoi: ");
+                    scanf("%d", &Phim.doTuoi);
+                    break;
+                }
+            } while (subChoice != 1 && subChoice != 2);
 
             break;
         case 2:
