@@ -5,6 +5,8 @@
 #define MAX 100
 #define FILE_THE_LOAI "theloai.txt"
 #define FILE_PHIM "phim.txt"
+#define FILE_SUAT_CHIEU "suatchieu.txt"
+
 
 struct theLoai
 {
@@ -19,79 +21,92 @@ struct typePhim
     char daoDien[50];
     int namSX;
     int loaiPhim;
-    float thoiLuong;
+    float thoiLuong; /* Tinh bang phut */
     int doTuoi;
 };
 
+struct ngayThang
+{
+    int ngay;
+    int thang;
+    int nam;
+};
+
+struct gioPhut
+{
+    int gio;
+    int phut;
+};
+
+struct suatChieu
+{
+    int maSuat;
+    int maPhim;
+    struct ngayThang ngayChieu;
+    struct gioPhut gioChieu;
+    int phongChieu;
+    float giaVe;
+    int soVeDaDat;
+};
+
+
 struct theLoai *danhSachTheLoai[MAX] = {NULL};
 struct typePhim *danhSachPhim[MAX] = {NULL};
+struct suatChieu *danhSachSuatChieu[MAX] = {NULL};
 
 int soLuong = 0;
 int soLuongPhim = 0;
+int soLuongSuatChieu = 0;
 
-/* Xoa phan con lai cua dong sau khi scanf */
+
 void checkInput(void)
 {
     int c;
     while ((c = getchar()) != '\n' && c != EOF)
     {
-        /* Bo qua ky tu thua */
     }
 }
 
-/* Doc so nguyen an toan hon scanf truc tiep */
 int nhapSoNguyen(const char *thongBao, int *giaTri)
 {
     printf("%s", thongBao);
-
     if (scanf("%d", giaTri) != 1)
     {
         printf("Du lieu khong hop le. Vui long nhap so nguyen!\n");
         checkInput();
         return 0;
     }
-
     checkInput();
     return 1;
 }
 
-/* Doc so thuc */
 int nhapSoThuc(const char *thongBao, float *giaTri)
 {
     printf("%s", thongBao);
-
     if (scanf("%f", giaTri) != 1)
     {
         printf("Du lieu khong hop le. Vui long nhap so!\n");
         checkInput();
         return 0;
     }
-
     checkInput();
     return 1;
 }
 
-/* Doc chuoi co khoang trang */
 int nhapChuoi(const char *thongBao, char *chuoi, int kichThuoc)
 {
+    int c;
     printf("%s", thongBao);
-
     if (fgets(chuoi, kichThuoc, stdin) == NULL)
-    {
         return 0;
-    }
 
     chuoi[strcspn(chuoi, "\n")] = '\0';
-
-    /* Neu nguoi dung nhap dai hon kich thuoc mang, bo phan con lai */
     if (strchr(chuoi, '\0') != NULL)
     {
-        int c;
         if (strlen(chuoi) == (size_t)(kichThuoc - 1))
         {
             while ((c = getchar()) != '\n' && c != EOF)
             {
-                /* Bo qua */
             }
         }
     }
@@ -101,277 +116,268 @@ int nhapChuoi(const char *thongBao, char *chuoi, int kichThuoc)
         printf("Chuoi khong duoc de trong!\n");
         return 0;
     }
-
     return 1;
 }
 
 int timViTriTheLoai(int maTheLoai)
 {
-    int i = 0;
+    int i;
     for (i = 0; i < soLuong; i++)
     {
-        if (danhSachTheLoai[i] != NULL &&
-            danhSachTheLoai[i]->maTheLoai == maTheLoai)
-        {
+        if (danhSachTheLoai[i] != NULL && danhSachTheLoai[i]->maTheLoai == maTheLoai)
             return i;
-        }
     }
-
     return -1;
 }
 
 int timViTriPhim(int maPhim)
 {
-    int i = 0;
+    int i;
     for (i = 0; i < soLuongPhim; i++)
     {
-        if (danhSachPhim[i] != NULL &&
-            danhSachPhim[i]->maPhim == maPhim)
-        {
+        if (danhSachPhim[i] != NULL && danhSachPhim[i]->maPhim == maPhim)
             return i;
-        }
     }
-
     return -1;
 }
 
 int tonTaiPhimTheoTheLoai(int maTheLoai)
 {
-    int i = 0;
+    int i;
     for (i = 0; i < soLuongPhim; i++)
     {
-        if (danhSachPhim[i] != NULL &&
-            danhSachPhim[i]->loaiPhim == maTheLoai)
-        {
+        if (danhSachPhim[i] != NULL && danhSachPhim[i]->loaiPhim == maTheLoai)
             return 1;
-        }
     }
-
     return 0;
 }
 
-/* ==================== LUU FILE ==================== */
-
-void luuPhimVaoFile(void)
+int kiemTraNgayHopLe(int d, int m, int y)
 {
-    int i = 0;
-    FILE *f = fopen(FILE_PHIM, "w");
-
-    if (f == NULL)
+    int nhuan;
+    if (y < 2023 || m < 1 || m > 12 || d < 1 || d > 31)
+        return 0;
+    if ((m == 4 || m == 6 || m == 9 || m == 11) && d > 30)
+        return 0;
+    if (m == 2)
     {
-        printf("Khong mo duoc file %s!\n", FILE_PHIM);
-        return;
+        nhuan = ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0));
+        if (d > 28 + nhuan)
+            return 0;
     }
-
-    for (i = 0; i < soLuongPhim; i++)
-    {
-        fprintf(f, "%d|%s|%s|%d|%d|%.3f|%d\n",
-                danhSachPhim[i]->maPhim,
-                danhSachPhim[i]->tenPhim,
-                danhSachPhim[i]->daoDien,
-                danhSachPhim[i]->namSX,
-                danhSachPhim[i]->loaiPhim,
-                danhSachPhim[i]->thoiLuong,
-                danhSachPhim[i]->doTuoi);
-    }
-
-    fclose(f);
-    printf("Da luu danh sach phim vao file!\n");
+    return 1;
 }
+
+int kiemTraTrungLich(int maSuatDangXet, int phong, struct ngayThang nc, struct gioPhut gc, float thoiLuong)
+{
+    int startDangXet = gc.gio * 60 + gc.phut;
+    int endDangXet = startDangXet + (int)thoiLuong;
+    int i, vtPhim, startDaCo, endDaCo;
+    float tlDaCo;
+
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        if (danhSachSuatChieu[i] == NULL)
+            continue;
+        if (maSuatDangXet != -1 && danhSachSuatChieu[i]->maSuat == maSuatDangXet)
+            continue;
+
+        if (danhSachSuatChieu[i]->phongChieu == phong &&
+            danhSachSuatChieu[i]->ngayChieu.ngay == nc.ngay &&
+            danhSachSuatChieu[i]->ngayChieu.thang == nc.thang &&
+            danhSachSuatChieu[i]->ngayChieu.nam == nc.nam)
+        {
+
+            vtPhim = timViTriPhim(danhSachSuatChieu[i]->maPhim);
+            tlDaCo = (vtPhim != -1) ? danhSachPhim[vtPhim]->thoiLuong : 120.0;
+
+            startDaCo = danhSachSuatChieu[i]->gioChieu.gio * 60 + danhSachSuatChieu[i]->gioChieu.phut;
+            endDaCo = startDaCo + (int)tlDaCo;
+
+            if (startDangXet < (endDaCo + 15) && (endDangXet + 15) > startDaCo)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 
 void luuTheLoaiVaoFile(void)
 {
-    int i = 0;
+    int i;
     FILE *f = fopen(FILE_THE_LOAI, "w");
-
     if (f == NULL)
-    {
-        printf("Khong mo duoc file %s!\n", FILE_THE_LOAI);
         return;
-    }
-
     for (i = 0; i < soLuong; i++)
     {
-        fprintf(f, "%d|%s\n",
-                danhSachTheLoai[i]->maTheLoai,
-                danhSachTheLoai[i]->tenTheLoai);
+        fprintf(f, "%d|%s\n", danhSachTheLoai[i]->maTheLoai, danhSachTheLoai[i]->tenTheLoai);
     }
-
     fclose(f);
-    printf("Da luu danh sach the loai vao file!\n");
 }
 
-/* ==================== DOC FILE ==================== */
+void luuPhimVaoFile(void)
+{
+    int i;
+    FILE *f = fopen(FILE_PHIM, "w");
+    if (f == NULL)
+        return;
+    for (i = 0; i < soLuongPhim; i++)
+    {
+        fprintf(f, "%d|%s|%s|%d|%d|%.3f|%d\n",
+                danhSachPhim[i]->maPhim, danhSachPhim[i]->tenPhim, danhSachPhim[i]->daoDien,
+                danhSachPhim[i]->namSX, danhSachPhim[i]->loaiPhim, danhSachPhim[i]->thoiLuong, danhSachPhim[i]->doTuoi);
+    }
+    fclose(f);
+}
+
+void luuSuatChieuVaoFile(void)
+{
+    int i;
+    FILE *f = fopen(FILE_SUAT_CHIEU, "w");
+    if (f == NULL)
+        return;
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        fprintf(f, "%d|%d|%d|%d|%d|%d|%d|%d|%.0f|%d\n",
+                danhSachSuatChieu[i]->maSuat, danhSachSuatChieu[i]->maPhim,
+                danhSachSuatChieu[i]->ngayChieu.ngay, danhSachSuatChieu[i]->ngayChieu.thang, danhSachSuatChieu[i]->ngayChieu.nam,
+                danhSachSuatChieu[i]->gioChieu.gio, danhSachSuatChieu[i]->gioChieu.phut,
+                danhSachSuatChieu[i]->phongChieu, danhSachSuatChieu[i]->giaVe, danhSachSuatChieu[i]->soVeDaDat);
+    }
+    fclose(f);
+}
 
 void docTheLoaiTuFile(void)
 {
-    FILE *f = fopen(FILE_THE_LOAI, "r");
-
-    if (f == NULL)
-    {
-        return;
-    }
-
-    int ma;
+    FILE *f;
+    int ma, c;
     char ten[50];
+    struct theLoai *data;
 
-    while (soLuong < MAX &&
-           fscanf(f, "%d|%49[^\n]", &ma, ten) == 2)
+    f = fopen(FILE_THE_LOAI, "r");
+    if (f == NULL)
+        return;
+
+    while (soLuong < MAX && fscanf(f, "%d|%49[^\n]", &ma, ten) == 2)
     {
-        struct theLoai *theLoaiPhim = malloc(sizeof(struct theLoai));
-
-        if (theLoaiPhim == NULL)
-        {
-            printf("Khong du bo nho khi doc the loai!\n");
+        data = malloc(sizeof(struct theLoai));
+        if (data == NULL)
             break;
-        }
-
-        theLoaiPhim->maTheLoai = ma;
-        strcpy(theLoaiPhim->tenTheLoai, ten);
-
-        danhSachTheLoai[soLuong++] = theLoaiPhim;
-
-        /* Bo ky tu xuong dong */
-        int c;
+        data->maTheLoai = ma;
+        strcpy(data->tenTheLoai, ten);
+        danhSachTheLoai[soLuong++] = data;
         while ((c = fgetc(f)) != '\n' && c != EOF)
         {
-            /* Bo qua */
         }
     }
-
     fclose(f);
 }
 
 void docPhimTuFile(void)
 {
-    FILE *f = fopen(FILE_PHIM, "r");
+    FILE *f;
+    struct typePhim temp;
+    struct typePhim *data;
+    int c;
 
+    f = fopen(FILE_PHIM, "r");
     if (f == NULL)
-    {
         return;
-    }
 
-    int maPhim, namSX, loaiPhim, doTuoi;
-    char tenPhim[50], daoDien[50];
-    float thoiLuong;
-
-    while (soLuongPhim < MAX &&
-           fscanf(f, "%d|%49[^|]|%49[^|]|%d|%d|%f|%d",
-                  &maPhim,
-                  tenPhim,
-                  daoDien,
-                  &namSX,
-                  &loaiPhim,
-                  &thoiLuong,
-                  &doTuoi) == 7)
+    while (soLuongPhim < MAX && fscanf(f, "%d|%49[^|]|%49[^|]|%d|%d|%f|%d",
+                                       &temp.maPhim, temp.tenPhim, temp.daoDien, &temp.namSX,
+                                       &temp.loaiPhim, &temp.thoiLuong, &temp.doTuoi) == 7)
     {
-        struct typePhim *dataPhim = malloc(sizeof(struct typePhim));
-
-        if (dataPhim == NULL)
-        {
-            printf("Khong du bo nho khi doc phim!\n");
+        data = malloc(sizeof(struct typePhim));
+        if (data == NULL)
             break;
-        }
-
-        dataPhim->maPhim = maPhim;
-        strcpy(dataPhim->tenPhim, tenPhim);
-        strcpy(dataPhim->daoDien, daoDien);
-        dataPhim->namSX = namSX;
-        dataPhim->loaiPhim = loaiPhim;
-        dataPhim->thoiLuong = thoiLuong;
-        dataPhim->doTuoi = doTuoi;
-
-        danhSachPhim[soLuongPhim++] = dataPhim;
-
-        int c;
+        *data = temp;
+        danhSachPhim[soLuongPhim++] = data;
         while ((c = fgetc(f)) != '\n' && c != EOF)
         {
-            /* Bo qua */
         }
     }
-
     fclose(f);
 }
 
-/* ==================== XUAT DANH SACH ==================== */
+void docSuatChieuTuFile(void)
+{
+    FILE *f;
+    struct suatChieu temp;
+    struct suatChieu *data;
+
+    f = fopen(FILE_SUAT_CHIEU, "r");
+    if (f == NULL)
+        return;
+
+    while (soLuongSuatChieu < MAX && fscanf(f, "%d|%d|%d|%d|%d|%d|%d|%d|%f|%d",
+                                            &temp.maSuat, &temp.maPhim, &temp.ngayChieu.ngay, &temp.ngayChieu.thang, &temp.ngayChieu.nam,
+                                            &temp.gioChieu.gio, &temp.gioChieu.phut, &temp.phongChieu, &temp.giaVe, &temp.soVeDaDat) == 10)
+    {
+        data = malloc(sizeof(struct suatChieu));
+        if (data == NULL)
+            break;
+        *data = temp;
+        danhSachSuatChieu[soLuongSuatChieu++] = data;
+    }
+    fclose(f);
+}
+
 
 void xuatTheLoai(void)
 {
-    int i = 0;
+    int i;
     printf("\n========== DANH SACH THE LOAI ==========\n");
-
     if (soLuong == 0)
     {
         printf("Chua co the loai nao!\n");
         return;
     }
-
     for (i = 0; i < soLuong; i++)
     {
-        printf("Ma the loai: %d | Ten the loai: %s\n",
-               danhSachTheLoai[i]->maTheLoai,
-               danhSachTheLoai[i]->tenTheLoai);
+        printf("Ma: %d | Ten: %s\n", danhSachTheLoai[i]->maTheLoai, danhSachTheLoai[i]->tenTheLoai);
     }
 }
 
 void xuatphim(void)
 {
-    int i = 0;
+    int i;
     printf("\n================ DANH SACH PHIM ================\n");
-
     if (soLuongPhim == 0)
     {
         printf("Chua co phim nao!\n");
         return;
     }
-
     for (i = 0; i < soLuongPhim; i++)
     {
-        printf("Ma phim: %d | Ten phim: %s | Dao dien: %s | "
-               "Nam SX: %d | Ma the loai: %d | "
-               "Thoi luong: %.3f | Do tuoi: %d\n",
-               danhSachPhim[i]->maPhim,
-               danhSachPhim[i]->tenPhim,
-               danhSachPhim[i]->daoDien,
-               danhSachPhim[i]->namSX,
-               danhSachPhim[i]->loaiPhim,
-               danhSachPhim[i]->thoiLuong,
-               danhSachPhim[i]->doTuoi);
+        printf("Ma: %d | Phim: %s | DDien: %s | Nam: %d | TL: %d | Dai: %.0f phut | Tuoi: %d\n",
+               danhSachPhim[i]->maPhim, danhSachPhim[i]->tenPhim, danhSachPhim[i]->daoDien,
+               danhSachPhim[i]->namSX, danhSachPhim[i]->loaiPhim, danhSachPhim[i]->thoiLuong, danhSachPhim[i]->doTuoi);
     }
 }
 
-/* ==================== CRUD THE LOAI ==================== */
 
 void themTheLoai(void)
 {
+    struct theLoai *data;
     if (soLuong >= MAX)
-    {
-        printf("Danh sach the loai da day!\n");
         return;
-    }
 
-    struct theLoai *data = malloc(sizeof(struct theLoai));
-
-    if (data == NULL)
-    {
-        printf("Khong du bo nho!\n");
-        return;
-    }
-
+    data = malloc(sizeof(struct theLoai));
     if (!nhapSoNguyen("Nhap ma the loai: ", &data->maTheLoai))
     {
         free(data);
         return;
     }
-
     if (timViTriTheLoai(data->maTheLoai) != -1)
     {
-        printf("Ma the loai da ton tai!\n");
+        printf("Da ton tai!\n");
         free(data);
         return;
     }
-
-    if (!nhapChuoi("Nhap ten the loai: ", data->tenTheLoai, 50))
+    if (!nhapChuoi("Nhap ten: ", data->tenTheLoai, 50))
     {
         free(data);
         return;
@@ -379,100 +385,64 @@ void themTheLoai(void)
 
     danhSachTheLoai[soLuong++] = data;
     luuTheLoaiVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void suaTheLoai(void)
 {
-    int maCanSua;
+    int ma, vt;
+    if (!nhapSoNguyen("Nhap ma the loai can sua: ", &ma))
+        return;
 
-    if (!nhapSoNguyen("Nhap ma the loai can sua: ", &maCanSua))
+    vt = timViTriTheLoai(ma);
+    if (vt == -1)
     {
+        printf("Khong tim thay!\n");
         return;
     }
-
-    int viTri = timViTriTheLoai(maCanSua);
-
-    if (viTri == -1)
-    {
-        printf("Khong tim thay the loai co ma %d!\n", maCanSua);
+    if (!nhapChuoi("Nhap ten moi: ", danhSachTheLoai[vt]->tenTheLoai, 50))
         return;
-    }
-
-    char tenMoi[50];
-
-    if (!nhapChuoi("Nhap ten the loai moi: ", tenMoi, 50))
-    {
-        return;
-    }
-
-    char tenCu[50];
-    strcpy(tenCu, danhSachTheLoai[viTri]->tenTheLoai);
-    strcpy(danhSachTheLoai[viTri]->tenTheLoai, tenMoi);
-
-    printf("Da sua %s --> %s\n",
-           tenCu,
-           danhSachTheLoai[viTri]->tenTheLoai);
 
     luuTheLoaiVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void xoaTheLoai(void)
 {
-    int j = 0;
-    int maCanXoa;
+    int ma, vt, j;
+    if (!nhapSoNguyen("Nhap ma the loai can xoa: ", &ma))
+        return;
 
-    if (!nhapSoNguyen("Nhap ma the loai can xoa: ", &maCanXoa))
+    vt = timViTriTheLoai(ma);
+    if (vt == -1)
     {
+        printf("Khong tim thay!\n");
+        return;
+    }
+    if (tonTaiPhimTheoTheLoai(ma))
+    {
+        printf("Khong the xoa, con phim lien quan!\n");
         return;
     }
 
-    int viTri = timViTriTheLoai(maCanXoa);
-
-    if (viTri == -1)
-    {
-        printf("Khong tim thay the loai!\n");
-        return;
-    }
-
-    if (tonTaiPhimTheoTheLoai(maCanXoa))
-    {
-        printf("Khong the xoa: van con phim thuoc the loai nay!\n");
-        return;
-    }
-
-    free(danhSachTheLoai[viTri]);
-
-    for (j = viTri; j < soLuong - 1; j++)
-    {
+    free(danhSachTheLoai[vt]);
+    for (j = vt; j < soLuong - 1; j++)
         danhSachTheLoai[j] = danhSachTheLoai[j + 1];
-    }
+    danhSachTheLoai[--soLuong] = NULL;
 
-    soLuong--;
-    danhSachTheLoai[soLuong] = NULL;
-
-    printf("Da xoa the loai thanh cong!\n");
     luuTheLoaiVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void crudLoaiPhim(void)
 {
-    int subChoice;
-
+    int choice;
     do
     {
-        printf("\n========= QUAN LY THE LOAI =========\n");
-        printf("1. Danh sach the loai phim\n");
-        printf("2. Them the loai phim\n");
-        printf("3. Sua the loai phim\n");
-        printf("4. Xoa the loai phim\n");
-        printf("0. Quay lai\n");
-
-        if (!nhapSoNguyen("Chon chuc nang: ", &subChoice))
-        {
+        printf("\n--- QUAN LY THE LOAI ---\n1. Xem\n2. Them\n3. Sua\n4. Xoa\n0. Back\n");
+        if (!nhapSoNguyen("Chon: ", &choice))
             continue;
-        }
-
-        switch (subChoice)
+        switch (choice)
         {
         case 1:
             xuatTheLoai();
@@ -486,191 +456,108 @@ void crudLoaiPhim(void)
         case 4:
             xoaTheLoai();
             break;
-        case 0:
-            break;
-        default:
-            printf("Lua chon khong hop le!\n");
         }
-    } while (subChoice != 0);
+    } while (choice != 0);
 }
 
-/* ==================== CRUD PHIM ==================== */
 
 void themPhim(void)
 {
-    if (soLuongPhim >= MAX)
+    struct typePhim *data;
+    if (soLuongPhim >= MAX || soLuong == 0)
     {
-        printf("Danh sach phim da day!\n");
+        printf("Day hoac chua co The loai!\n");
         return;
     }
 
-    if (soLuong == 0)
+    data = malloc(sizeof(struct typePhim));
+    if (!nhapSoNguyen("Nhap ID phim: ", &data->maPhim))
     {
-        printf("Can them the loai truoc khi them phim!\n");
+        free(data);
         return;
     }
-
-    struct typePhim *dataPhim = malloc(sizeof(struct typePhim));
-
-    if (dataPhim == NULL)
+    if (timViTriPhim(data->maPhim) != -1)
     {
-        printf("Khong du bo nho!\n");
-        return;
-    }
-
-    if (!nhapSoNguyen("Nhap ID phim: ", &dataPhim->maPhim))
-    {
-        free(dataPhim);
-        return;
-    }
-
-    if (timViTriPhim(dataPhim->maPhim) != -1)
-    {
-        printf("Ma phim da ton tai!\n");
-        free(dataPhim);
+        printf("Trung ID!\n");
+        free(data);
         return;
     }
 
     xuatTheLoai();
-
-    if (!nhapSoNguyen("Nhap ID the loai: ", &dataPhim->loaiPhim))
+    if (!nhapSoNguyen("Nhap ID the loai: ", &data->loaiPhim) || timViTriTheLoai(data->loaiPhim) == -1)
     {
-        free(dataPhim);
+        free(data);
+        return;
+    }
+    if (!nhapChuoi("Ten phim: ", data->tenPhim, 50) || !nhapChuoi("Dao dien: ", data->daoDien, 50) ||
+        !nhapSoNguyen("Nam SX: ", &data->namSX) || !nhapSoThuc("Thoi luong (phut): ", &data->thoiLuong) ||
+        !nhapSoNguyen("Do tuoi: ", &data->doTuoi))
+    {
+        free(data);
         return;
     }
 
-    if (timViTriTheLoai(dataPhim->loaiPhim) == -1)
-    {
-        printf("Ma the loai khong ton tai!\n");
-        free(dataPhim);
-        return;
-    }
-
-    if (!nhapChuoi("Nhap ten phim: ", dataPhim->tenPhim, 50) ||
-        !nhapChuoi("Nhap dao dien: ", dataPhim->daoDien, 50) ||
-        !nhapSoNguyen("Nhap nam san xuat: ", &dataPhim->namSX) ||
-        !nhapSoThuc("Nhap thoi luong: ", &dataPhim->thoiLuong) ||
-        !nhapSoNguyen("Nhap do tuoi: ", &dataPhim->doTuoi))
-    {
-        free(dataPhim);
-        return;
-    }
-
-    danhSachPhim[soLuongPhim++] = dataPhim;
-
-    printf("Them phim thanh cong!\n");
+    danhSachPhim[soLuongPhim++] = data;
     luuPhimVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void suaPhim(void)
 {
-    int maCanSua;
+    int ma, vt;
+    if (!nhapSoNguyen("Nhap ma phim can sua: ", &ma))
+        return;
 
-    if (!nhapSoNguyen("Nhap ma phim can sua: ", &maCanSua))
+    vt = timViTriPhim(ma);
+    if (vt == -1)
     {
+        printf("Khong thay!\n");
         return;
     }
-
-    int viTri = timViTriPhim(maCanSua);
-
-    if (viTri == -1)
-    {
-        printf("Khong tim thay phim co ma %d!\n", maCanSua);
-        return;
-    }
-
-    int maTheLoaiMoi;
 
     xuatTheLoai();
-
-    if (!nhapSoNguyen("Nhap ma the loai moi: ", &maTheLoaiMoi))
-    {
+    if (!nhapSoNguyen("Nhap ma TL moi: ", &danhSachPhim[vt]->loaiPhim) || timViTriTheLoai(danhSachPhim[vt]->loaiPhim) == -1)
         return;
-    }
-
-    if (timViTriTheLoai(maTheLoaiMoi) == -1)
-    {
-        printf("Ma the loai khong ton tai! Khong cap nhat phim.\n");
+    if (!nhapChuoi("Ten: ", danhSachPhim[vt]->tenPhim, 50) || !nhapChuoi("DD: ", danhSachPhim[vt]->daoDien, 50) ||
+        !nhapSoNguyen("Nam: ", &danhSachPhim[vt]->namSX) || !nhapSoThuc("Thoi luong: ", &danhSachPhim[vt]->thoiLuong) ||
+        !nhapSoNguyen("Tuoi: ", &danhSachPhim[vt]->doTuoi))
         return;
-    }
 
-    char tenMoi[50];
-    char daoDienMoi[50];
-    int namSXMoi;
-    float thoiLuongMoi;
-    int doTuoiMoi;
-
-    if (!nhapChuoi("Nhap ten phim moi: ", tenMoi, 50) ||
-        !nhapChuoi("Nhap dao dien moi: ", daoDienMoi, 50) ||
-        !nhapSoNguyen("Nhap nam san xuat moi: ", &namSXMoi) ||
-        !nhapSoThuc("Nhap thoi luong moi: ", &thoiLuongMoi) ||
-        !nhapSoNguyen("Nhap do tuoi moi: ", &doTuoiMoi))
-    {
-        return;
-    }
-
-    danhSachPhim[viTri]->loaiPhim = maTheLoaiMoi;
-    strcpy(danhSachPhim[viTri]->tenPhim, tenMoi);
-    strcpy(danhSachPhim[viTri]->daoDien, daoDienMoi);
-    danhSachPhim[viTri]->namSX = namSXMoi;
-    danhSachPhim[viTri]->thoiLuong = thoiLuongMoi;
-    danhSachPhim[viTri]->doTuoi = doTuoiMoi;
-
-    printf("Da sua thong tin phim thanh cong!\n");
     luuPhimVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void xoaPhim(void)
 {
-    int j = 0;
-    int maCanXoa;
+    int ma, vt, j;
+    if (!nhapSoNguyen("Nhap ma can xoa: ", &ma))
+        return;
 
-    if (!nhapSoNguyen("Nhap ma phim can xoa: ", &maCanXoa))
+    vt = timViTriPhim(ma);
+    if (vt == -1)
     {
+        printf("Khong tim thay!\n");
         return;
     }
 
-    int viTri = timViTriPhim(maCanXoa);
-
-    if (viTri == -1)
-    {
-        printf("Khong tim thay phim!\n");
-        return;
-    }
-
-    free(danhSachPhim[viTri]);
-
-    for (j = viTri; j < soLuongPhim - 1; j++)
-    {
+    free(danhSachPhim[vt]);
+    for (j = vt; j < soLuongPhim - 1; j++)
         danhSachPhim[j] = danhSachPhim[j + 1];
-    }
+    danhSachPhim[--soLuongPhim] = NULL;
 
-    soLuongPhim--;
-    danhSachPhim[soLuongPhim] = NULL;
-
-    printf("Da xoa phim thanh cong!\n");
     luuPhimVaoFile();
+    printf("Thanh cong!\n");
 }
 
 void crudPhim(void)
 {
-    int subChoice;
-
+    int choice;
     do
     {
-        printf("\n============= QUAN LY PHIM =============\n");
-        printf("1. Danh sach phim\n");
-        printf("2. Them phim\n");
-        printf("3. Sua phim\n");
-        printf("4. Xoa phim\n");
-        printf("0. Quay lai\n");
-
-        if (!nhapSoNguyen("Chon chuc nang: ", &subChoice))
-        {
+        printf("\n--- QUAN LY PHIM ---\n1. Xem\n2. Them\n3. Sua\n4. Xoa\n0. Back\n");
+        if (!nhapSoNguyen("Chon: ", &choice))
             continue;
-        }
-
-        switch (subChoice)
+        switch (choice)
         {
         case 1:
             xuatphim();
@@ -684,66 +571,320 @@ void crudPhim(void)
         case 4:
             xoaPhim();
             break;
-        case 0:
-            break;
-        default:
-            printf("Lua chon khong hop le!\n");
-        }
-    } while (subChoice != 0);
-}
-
-/* ==================== MENU QUAN LY ==================== */
-
-void functionPhim(void)
-{
-    int choice;
-
-    do
-    {
-        printf("\n========== QUAN LY PHIM ==========\n");
-        printf("1. Quan ly the loai phim\n");
-        printf("2. Quan ly phim\n");
-        printf("0. Quay lai menu chinh\n");
-
-        if (!nhapSoNguyen("Chon chuc nang: ", &choice))
-        {
-            continue;
-        }
-
-        switch (choice)
-        {
-        case 1:
-            crudLoaiPhim();
-            break;
-        case 2:
-            crudPhim();
-            break;
-        case 0:
-            break;
-        default:
-            printf("Lua chon khong hop le!\n");
         }
     } while (choice != 0);
 }
 
-/* Giai phong bo nho da cap phat */
+void functionPhim(void)
+{
+    int choice;
+    do
+    {
+        printf("\n========== MENU PHIM ==========\n1. Quan ly The Loai\n2. Quan ly Phim\n0. Quay lai\n");
+        if (!nhapSoNguyen("Chon: ", &choice))
+            continue;
+        if (choice == 1)
+            crudLoaiPhim();
+        else if (choice == 2)
+            crudPhim();
+    } while (choice != 0);
+}
+
+
+void hienThiSuatChieu(void)
+{
+    int i, vt;
+    printf("\n================ DANH SACH SUAT CHIEU ================\n");
+    if (soLuongSuatChieu == 0)
+    {
+        printf("Chua co suat chieu nao!\n");
+        return;
+    }
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        vt = timViTriPhim(danhSachSuatChieu[i]->maPhim);
+        printf("ID: %d | Phim: %s | Ngay: %02d/%02d/%d | Gio: %02d:%02d | Phong: %d | Gia: %.0f | Da dat: %d\n",
+               danhSachSuatChieu[i]->maSuat, (vt != -1 ? danhSachPhim[vt]->tenPhim : "N/A"),
+               danhSachSuatChieu[i]->ngayChieu.ngay, danhSachSuatChieu[i]->ngayChieu.thang, danhSachSuatChieu[i]->ngayChieu.nam,
+               danhSachSuatChieu[i]->gioChieu.gio, danhSachSuatChieu[i]->gioChieu.phut,
+               danhSachSuatChieu[i]->phongChieu, danhSachSuatChieu[i]->giaVe, danhSachSuatChieu[i]->soVeDaDat);
+    }
+}
+
+void themSuatChieu(void)
+{
+    struct suatChieu *data;
+    int vtPhim, i;
+
+    if (soLuongSuatChieu >= MAX)
+        return;
+    if (soLuongPhim == 0)
+    {
+        printf("Vui long them phim truoc!\n");
+        return;
+    }
+
+    data = malloc(sizeof(struct suatChieu));
+    if (!nhapSoNguyen("Nhap ma suat: ", &data->maSuat))
+    {
+        free(data);
+        return;
+    }
+
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        if (danhSachSuatChieu[i]->maSuat == data->maSuat)
+        {
+            printf("Ma suat da ton tai!\n");
+            free(data);
+            return;
+        }
+    }
+
+    xuatphim();
+    if (!nhapSoNguyen("Nhap ma phim: ", &data->maPhim))
+    {
+        free(data);
+        return;
+    }
+    vtPhim = timViTriPhim(data->maPhim);
+    if (vtPhim == -1)
+    {
+        printf("Loi: Phim khong ton tai!\n");
+        free(data);
+        return;
+    }
+
+    printf("Ngay chieu (DD MM YYYY): ");
+    if (scanf("%d %d %d", &data->ngayChieu.ngay, &data->ngayChieu.thang, &data->ngayChieu.nam) != 3 ||
+        !kiemTraNgayHopLe(data->ngayChieu.ngay, data->ngayChieu.thang, data->ngayChieu.nam))
+    {
+        printf("Ngay khong hop le!\n");
+        checkInput();
+        free(data);
+        return;
+    }
+    checkInput();
+
+    printf("Gio chieu (HH MM): ");
+    if (scanf("%d %d", &data->gioChieu.gio, &data->gioChieu.phut) != 2 ||
+        data->gioChieu.gio < 0 || data->gioChieu.gio > 23 || data->gioChieu.phut < 0 || data->gioChieu.phut > 59)
+    {
+        printf("Gio khong hop le!\n");
+        checkInput();
+        free(data);
+        return;
+    }
+    checkInput();
+
+    if (!nhapSoNguyen("Phong chieu (doi merge UC 3): ", &data->phongChieu) || data->phongChieu < 1 || data->phongChieu > 10)
+    {
+        printf("Phong khong hop le!\n");
+        free(data);
+        return;
+    }
+
+    if (kiemTraTrungLich(-1, data->phongChieu, data->ngayChieu, data->gioChieu, danhSachPhim[vtPhim]->thoiLuong))
+    {
+        printf("Loi: Trung lich voi suat khac cung phong!\n");
+        free(data);
+        return;
+    }
+
+    if (!nhapSoThuc("Gia ve: ", &data->giaVe) || data->giaVe <= 0)
+    {
+        printf("Gia ve khong hop le!\n");
+        free(data);
+        return;
+    }
+
+    data->soVeDaDat = 0;
+    danhSachSuatChieu[soLuongSuatChieu++] = data;
+    luuSuatChieuVaoFile();
+    printf("Them suat chieu thanh cong!\n");
+}
+
+void xoaSuatChieu(void)
+{
+    int ma, vt = -1, i;
+    if (!nhapSoNguyen("Nhap ma suat can xoa: ", &ma))
+        return;
+
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        if (danhSachSuatChieu[i]->maSuat == ma)
+        {
+            vt = i;
+            break;
+        }
+    }
+    if (vt == -1)
+    {
+        printf("Khong tim thay!\n");
+        return;
+    }
+    if (danhSachSuatChieu[vt]->soVeDaDat > 0)
+    {
+        printf("Khong the xoa, da co khach dat ve!\n");
+        return;
+    }
+
+    free(danhSachSuatChieu[vt]);
+    for (i = vt; i < soLuongSuatChieu - 1; i++)
+        danhSachSuatChieu[i] = danhSachSuatChieu[i + 1];
+    danhSachSuatChieu[--soLuongSuatChieu] = NULL;
+
+    luuSuatChieuVaoFile();
+    printf("Xoa thanh cong!\n");
+}
+
+void capNhatSuatChieu(void)
+{
+    int ma, vt = -1, i, thoiLuongPhim, vtPhim;
+    struct suatChieu temp;
+
+    if (!nhapSoNguyen("Nhap ma suat can sua: ", &ma))
+        return;
+
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        if (danhSachSuatChieu[i]->maSuat == ma)
+        {
+            vt = i;
+            break;
+        }
+    }
+    if (vt == -1)
+    {
+        printf("Khong tim thay suat!\n");
+        return;
+    }
+    if (danhSachSuatChieu[vt]->soVeDaDat > 0)
+    {
+        printf("Suat chieu da co khach dat, viec sua doi co the anh huong den ve cua khach!\n");
+    }
+
+    temp = *danhSachSuatChieu[vt];
+    thoiLuongPhim = 120;
+    vtPhim = timViTriPhim(temp.maPhim);
+    if (vtPhim != -1)
+        thoiLuongPhim = danhSachPhim[vtPhim]->thoiLuong;
+
+    printf("Ngay chieu moi (DD MM YYYY): ");
+    if (scanf("%d %d %d", &temp.ngayChieu.ngay, &temp.ngayChieu.thang, &temp.ngayChieu.nam) == 3 &&
+        kiemTraNgayHopLe(temp.ngayChieu.ngay, temp.ngayChieu.thang, temp.ngayChieu.nam))
+    {
+        checkInput();
+    }
+    else
+    {
+        printf("Nhap sai! Giu nguyen gia tri cu.\n");
+        checkInput();
+    }
+
+    printf("Gio chieu moi (HH MM): ");
+    if (scanf("%d %d", &temp.gioChieu.gio, &temp.gioChieu.phut) == 2 &&
+        temp.gioChieu.gio >= 0 && temp.gioChieu.gio <= 23 && temp.gioChieu.phut >= 0 && temp.gioChieu.phut <= 59)
+    {
+        checkInput();
+    }
+    else
+    {
+        printf("Nhap sai! Giu nguyen gia tri cu.\n");
+        checkInput();
+    }
+
+    if (kiemTraTrungLich(ma, temp.phongChieu, temp.ngayChieu, temp.gioChieu, thoiLuongPhim))
+    {
+        printf("Thoi gian moi bi trung lich! Tu choi cap nhat.\n");
+        return;
+    }
+
+    if (nhapSoThuc("Gia ve moi: ", &temp.giaVe) && temp.giaVe > 0)
+    {
+        *danhSachSuatChieu[vt] = temp;
+        luuSuatChieuVaoFile();
+        printf("Cap nhat thanh cong!\n");
+    }
+    else
+    {
+        printf("Loi nhap gia ve!\n");
+    }
+}
+
+void timKiemSuatChieu(void)
+{
+    int ma, found = 0, i, vt;
+    if (!nhapSoNguyen("Nhap ma suat hoac ma phim can tim: ", &ma))
+        return;
+
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        if (danhSachSuatChieu[i]->maSuat == ma || danhSachSuatChieu[i]->maPhim == ma)
+        {
+            vt = timViTriPhim(danhSachSuatChieu[i]->maPhim);
+            printf("Thay suat: ID %d | Phim %s | Ngay %02d/%02d/%d | Gio %02d:%02d | Phong %d\n",
+                   danhSachSuatChieu[i]->maSuat, (vt != -1 ? danhSachPhim[vt]->tenPhim : "N/A"),
+                   danhSachSuatChieu[i]->ngayChieu.ngay, danhSachSuatChieu[i]->ngayChieu.thang, danhSachSuatChieu[i]->ngayChieu.nam,
+                   danhSachSuatChieu[i]->gioChieu.gio, danhSachSuatChieu[i]->gioChieu.phut, danhSachSuatChieu[i]->phongChieu);
+            found = 1;
+        }
+    }
+    if (!found)
+        printf("Khong tim thay ket qua!\n");
+}
+
+void functionSuatChieu(void)
+{
+    int choice;
+    do
+    {
+        printf("\n========= QUAN LY SUAT CHIEU =========\n");
+        printf("1. Xem tat ca suat chieu\n2. Tim kiem suat chieu\n3. Them suat chieu\n");
+        printf("4. Cap nhat suat chieu\n5. Xoa suat chieu\n0. Quay lai\n");
+        if (!nhapSoNguyen("Chon: ", &choice))
+            continue;
+
+        switch (choice)
+        {
+        case 1:
+            hienThiSuatChieu();
+            break;
+        case 2:
+            timKiemSuatChieu();
+            break;
+        case 3:
+            themSuatChieu();
+            break;
+        case 4:
+            capNhatSuatChieu();
+            break;
+        case 5:
+            xoaSuatChieu();
+            break;
+        }
+    } while (choice != 0);
+}
+
+
 void giaiPhongBoNho(void)
 {
-    int i = 0;
+    int i;
     for (i = 0; i < soLuong; i++)
     {
         free(danhSachTheLoai[i]);
         danhSachTheLoai[i] = NULL;
     }
-
     for (i = 0; i < soLuongPhim; i++)
     {
         free(danhSachPhim[i]);
         danhSachPhim[i] = NULL;
     }
-
-    soLuong = 0;
-    soLuongPhim = 0;
+    for (i = 0; i < soLuongSuatChieu; i++)
+    {
+        free(danhSachSuatChieu[i]);
+        danhSachSuatChieu[i] = NULL;
+    }
 }
 
 int main(void)
@@ -752,22 +893,21 @@ int main(void)
 
     docTheLoaiTuFile();
     docPhimTuFile();
+    docSuatChieuTuFile();
 
     do
     {
         printf("\n=============== MENU CHINH ===============\n");
-        printf("1. Quan ly phim\n");
-        printf("2. Quan ly phong / ghe\n");
-        printf("3. Quan ly suat chieu\n");
-        printf("4. Dat ve xem phim\n");
-        printf("5. Quan ly ve\n");
+        printf("1. Quan ly Phim / The loai\n");
+        printf("2. Quan ly Suat chieu\n");
+        printf("3. Quan ly Phong / Ghe (Tam thoi chua co)\n");
+        printf("4. Dat ve xem phim (Sap toi)\n");
+        printf("5. Quan ly ve (Sap toi)\n");
         printf("6. Thong ke doanh thu\n");
-        printf("7. Thoat chuong trinh\n");
+        printf("7. Thoat\n");
 
         if (!nhapSoNguyen("Chon menu: ", &choice))
-        {
             continue;
-        }
 
         switch (choice)
         {
@@ -775,27 +915,26 @@ int main(void)
             functionPhim();
             break;
         case 2:
-            printf("Quan ly ghe\n");
+            functionSuatChieu();
             break;
         case 3:
-            printf("Quan ly suat chieu\n");
+            printf("Dang phat trien...\n");
             break;
         case 4:
-            printf("Dat ve xem phim\n");
+            printf("Dang phat trien...\n");
             break;
         case 5:
-            printf("Quan ly ve\n");
+            printf("Dang phat trien...\n");
             break;
         case 6:
-            printf("Thong ke doanh thu\n");
+            printf("Dang phat trien...\n");
             break;
         case 7:
-            printf("Thoat chuong trinh\n");
+            printf("Hen gap lai!\n");
             break;
         default:
             printf("Lua chon khong hop le!\n");
         }
-
     } while (choice != 7);
 
     giaiPhongBoNho();
